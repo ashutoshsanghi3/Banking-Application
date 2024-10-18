@@ -2,6 +2,7 @@ package com.ashutosh.bankingApp.exception;
 
 import com.ashutosh.bankingApp.dto.response.BankResponse;
 import com.ashutosh.bankingApp.service.EmailService;
+import com.ashutosh.bankingApp.service.TransactionService;
 import com.ashutosh.bankingApp.service.UserService;
 import com.ashutosh.bankingApp.utils.AccountUtils;
 import org.springframework.http.HttpStatus;
@@ -41,5 +42,14 @@ public class GlobalExceptionHandler {
                 .responseMessage(AccountUtils.EMAIL_NOT_SENT_MESSAGE + ex.getMessage())
                 .build();
         return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TransactionService.InvalidDateFormatException.class)
+    public ResponseEntity<BankResponse> handleEmailSendingException(TransactionService.InvalidDateFormatException ex) {
+        BankResponse response = BankResponse.builder()
+                .responseCode(AccountUtils.INVALID_DATE_FORMAT_CODE)
+                .responseMessage(AccountUtils.INVALID_DATE_FORMAT_MESSAGE)
+                .build();
+        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
     }
 }

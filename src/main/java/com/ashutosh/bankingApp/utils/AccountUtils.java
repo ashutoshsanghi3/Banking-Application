@@ -34,6 +34,9 @@ public class AccountUtils {
 
     public static final String EMAIL_NOT_SENT_CODE = "103";
     public static final String EMAIL_NOT_SENT_MESSAGE = "Failed to send email to: ";
+    public static final String INVALID_DATE_FORMAT_CODE = "104";
+    public static final String INVALID_DATE_FORMAT_MESSAGE = "Invalid date format.Please use dd/MM/yyyy format instead.";
+
 
     private static String generateAccountNumber(){
         /*

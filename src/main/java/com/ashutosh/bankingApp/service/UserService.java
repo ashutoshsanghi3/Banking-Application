@@ -20,6 +20,7 @@ public interface UserService {
 
     BankResponse transferFunds(TransferRequest transferRequest) throws AccountNotExistsException, InsufficientBalanceException;
 
+
     public class AccountNotExistsException extends RuntimeException {
         public AccountNotExistsException(String message) {
             super(message);

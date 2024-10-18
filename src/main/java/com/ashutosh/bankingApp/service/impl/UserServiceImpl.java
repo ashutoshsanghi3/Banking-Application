@@ -1,15 +1,15 @@
 package com.ashutosh.bankingApp.service.impl;
 
-import com.ashutosh.bankingApp.dto.request.CreditDebitRequest;
-import com.ashutosh.bankingApp.dto.request.EnquiryRequest;
-import com.ashutosh.bankingApp.dto.request.TransferRequest;
-import com.ashutosh.bankingApp.dto.request.UserRequest;
+import com.ashutosh.bankingApp.dto.internal.TransactionDto;
+import com.ashutosh.bankingApp.dto.request.*;
 import com.ashutosh.bankingApp.dto.response.AccountInfo;
 import com.ashutosh.bankingApp.dto.response.BankResponse;
 import com.ashutosh.bankingApp.dto.response.EmailDetails;
+import com.ashutosh.bankingApp.entity.Transaction;
 import com.ashutosh.bankingApp.entity.User;
 import com.ashutosh.bankingApp.repository.UserRepository;
 import com.ashutosh.bankingApp.service.EmailService;
+import com.ashutosh.bankingApp.service.TransactionService;
 import com.ashutosh.bankingApp.service.UserService;
 import com.ashutosh.bankingApp.utils.AccountUtils;
 import jakarta.transaction.Transactional;
@@ -26,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    TransactionService transactionService;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -131,7 +134,7 @@ public class UserServiceImpl implements UserService {
     public String nameEnquiry(EnquiryRequest enquiryRequest) {
         //checking if account does not exist
         if(!userRepository.existsByAccountNumber(enquiryRequest.getAccountNumber())) {
-            return AccountUtils.ACCOUNT_NOT_EXISTS_MESSAGE;
+            return enquiryRequest.getAccountNumber()+AccountUtils.ACCOUNT_NOT_EXISTS_MESSAGE;
         }
 
         User foundUser = userRepository.findByAccountNumber(enquiryRequest.getAccountNumber());
@@ -175,6 +178,20 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         emailService.sendEmailAlerts(emailDetails);
+
+        //Save transaction
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(userToCredit.getAccountNumber())
+                .transactionType("CREDIT")
+                .amount(creditRequest.getAmount())
+                .build();
+
+
+        Transaction transaction = transactionService.saveTransaction(transactionDto);
+
+        //add transaction to the associated user account
+        userToCredit.getTransactions().add(transaction);
+        userRepository.save(userToCredit);
 
         //Sending bank response
         AccountInfo updatedInfo = AccountInfo.builder()
@@ -227,6 +244,15 @@ public class UserServiceImpl implements UserService {
 
         emailService.sendEmailAlerts(emailDetails);
 
+        //Save transaction
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(userToDebit.getAccountNumber())
+                .transactionType("DEBIT")
+                .amount(debitRequest.getAmount())
+                .build();
+
+        transactionService.saveTransaction(transactionDto);
+
         //Sending bank response
         AccountInfo updatedInfo = AccountInfo.builder()
                 .accountBalance(userToDebit.getAccountBalance())
@@ -266,4 +292,5 @@ public class UserServiceImpl implements UserService {
 
 
     }
+
 }
