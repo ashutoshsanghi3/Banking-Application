@@ -12,6 +12,7 @@ import com.ashutosh.bankingApp.service.EmailService;
 import com.ashutosh.bankingApp.service.TransactionService;
 import com.ashutosh.bankingApp.service.UserService;
 import com.ashutosh.bankingApp.utils.AccountUtils;
+import com.ashutosh.bankingApp.utils.enums.TransactionStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,7 +155,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public BankResponse creditAccount(CreditDebitRequest creditRequest) throws AccountNotExistsException {
         //checking if account does not exist
         if (!userRepository.existsByAccountNumber(creditRequest.getAccountNumber())) {
@@ -184,6 +184,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(userToCredit.getAccountNumber())
                 .transactionType("CREDIT")
                 .amount(creditRequest.getAmount())
+                .transactionStatus(TransactionStatus.SUCCESS)
                 .build();
 
 
@@ -207,7 +208,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public BankResponse debitAccount(CreditDebitRequest debitRequest)
             throws AccountNotExistsException, InsufficientBalanceException {
         //checking if account does not exist
@@ -222,6 +222,14 @@ public class UserServiceImpl implements UserService {
         // Check if the amount being debited is greater than the current balance
         if (userToDebit.getAccountBalance().compareTo(debitRequest.getAmount()) < 0) {
             System.out.println("Insufficient balance");
+            TransactionDto transactionDto = TransactionDto.builder()
+                    .accountNumber(userToDebit.getAccountNumber())
+                    .transactionType("DEBIT")
+                    .amount(debitRequest.getAmount())
+                    .transactionStatus(TransactionStatus.FAILED)
+                    .build();
+
+            transactionService.saveTransaction(transactionDto);
             throw new InsufficientBalanceException(debitRequest.getAccountNumber());
         }
 
@@ -249,6 +257,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(userToDebit.getAccountNumber())
                 .transactionType("DEBIT")
                 .amount(debitRequest.getAmount())
+                .transactionStatus(TransactionStatus.SUCCESS)
                 .build();
 
         transactionService.saveTransaction(transactionDto);

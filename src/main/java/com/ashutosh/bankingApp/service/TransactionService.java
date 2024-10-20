@@ -12,7 +12,6 @@ public interface TransactionService {
 
     List<TransactionResponse> getAllTransactions(String accountNumber);
 
-    List<TransactionResponse> generateTransactionStatement(String accountNumber, String startDate, String endDate);
 
     public class InvalidDateFormatException extends RuntimeException {
         public InvalidDateFormatException(DateTimeParseException message) {

@@ -1,5 +1,8 @@
 package com.ashutosh.bankingApp.dto.internal;
 
+import com.ashutosh.bankingApp.utils.enums.TransactionStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +18,6 @@ public class TransactionDto {
     private String transactionType;
     private BigDecimal amount;
     private String accountNumber;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus transactionStatus;
 }

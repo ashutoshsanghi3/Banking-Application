@@ -1,5 +1,6 @@
 package com.ashutosh.bankingApp.entity;
 
+import com.ashutosh.bankingApp.utils.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +22,10 @@ public class Transaction {
     private String transactionType;
     private BigDecimal amount;
     private String accountNumber;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private TransactionStatus transactionStatus;
     @CreationTimestamp
     private LocalDateTime transactionCreatedAt;
     @ManyToOne
